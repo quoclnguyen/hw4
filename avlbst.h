@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <algorithm>
 #include "bst.h"
-#include <cassert>
+
 
 struct KeyError { };
 
