@@ -76,3 +76,6 @@ bst-test
 
 .clang-format
 .clang-tidy
+bst-test.cpp
+avlTest1.cpp
+avlTest1

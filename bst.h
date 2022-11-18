@@ -199,6 +199,7 @@ public:
     virtual void insert(const std::pair<const Key, Value>& keyValuePair); //TODO
     virtual void remove(const Key& key); //TODO
     void clear(); //TODO
+    void clearHelper(Node<Key,Value> *curr);
     bool isBalanced() const; //TODO
     void print() const;
     bool empty() const;
@@ -514,14 +515,14 @@ void BinarySearchTree<Key, Value>::remove(const Key& key)
     }
     
     //if node has no children
-    // need code to check for root node, also, maybe i should just manually swap pointers instead of using nodeswap?
+    Node<Key, Value>* locationParent = location->getParent();
     if (location->getRight() == NULL && location ->getLeft() ==NULL){
       if (location == root_){
       delete root_;
       root_ =NULL;
       return;
     }
-      Node<Key, Value>* locationParent = location->getParent();
+      
       //check if it is left or right child. 
       if(locationParent->getLeft() == location){
         locationParent->setLeft(NULL);
@@ -535,27 +536,27 @@ void BinarySearchTree<Key, Value>::remove(const Key& key)
 
     else{ //node has 1 child
       Node<Key,Value>* c;
-      Node<Key,Value>* p = location->getParent();
+      //Node<Key,Value>* p = location->getParent();
       if(location->getRight()!= NULL){ //right child exists
         c = location->getRight();
       }
       else{
         c = location ->getLeft();
       }
-      c->setParent(p);
+      c->setParent(locationParent);
       if (location ==root_){
         delete root_;
         root_=c;
         return;
       }
 
-      if((location->getParent())->getLeft()==location){ 
+      if(locationParent->getLeft()==location){ 
         //if removed node was a left child
-        p->setLeft(c);
+        locationParent->setLeft(c);
       }
       else{
         //if removed node was right child
-        p->setRight(c);
+        locationParent->setRight(c);
 
       }
       delete location; 
@@ -571,20 +572,24 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
 {
     // TODO
     if (current ==NULL){return NULL;}
-    Node<Key,Value>* nodeToReturn;
+    //Node<Key,Value>* nodeToReturn;
     if (current ->getLeft()==NULL){
-      nodeToReturn = predecessorHelper(current,0);
+      return predecessorHelper(current,0);
     }
     else{
-      nodeToReturn = predecessorHelper(current->getLeft(),1);
+      return predecessorHelper(current->getLeft(),1);
     }
-    return nodeToReturn;
+    //return nodeToReturn;
 }
 template<typename Key, typename Value>
 Node<Key, Value>*
 BinarySearchTree<Key, Value>::predecessorHelper(Node<Key, Value>* current, int mode)  
 {
   if (mode ==0){
+        if (current == (current->getParent())->getLeft() && (current->getParent())->getParent()==NULL) {
+          //if parent is the root, and the child is a left node, there is no predecessor.
+          return NULL;
+        }
         if(current ->getParent()==NULL){return current;}
         if (current ==(current->getParent())->getRight()){return current->getParent();}
         return predecessorHelper(current->getParent(),0);
@@ -637,6 +642,14 @@ BinarySearchTree<Key, Value>::successorHelper(Node<Key, Value>* current, int mod
     
 }
 
+template<typename Key, typename Value>
+void BinarySearchTree<Key, Value>::clearHelper(Node<Key,Value> *curr) {
+    if (!curr) return;
+
+    clearHelper(curr->getLeft());
+    clearHelper(curr->getRight());
+    delete curr;
+}
 
 /**
 * A method to remove all contents of the tree and
@@ -646,10 +659,8 @@ template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear()
 {
     // TODO
-    while (root_!=NULL){
-        remove((this->getSmallestNode())->getKey());
-    }
-
+    clearHelper(root_);
+    root_ = nullptr;
 }
 
 
@@ -671,7 +682,7 @@ Node<Key, Value>*
 BinarySearchTree<Key, Value>::smallestHelper(Node<Key, Value>* value) const
 {
     // TODO
-
+    if (value==NULL){return NULL;}
     if (value->getLeft() == NULL){return value;}
     return smallestHelper(value->getLeft());
 
